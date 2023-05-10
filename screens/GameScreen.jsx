@@ -1,4 +1,4 @@
-import {Alert, StyleSheet, Text, View} from "react-native";
+import {Alert, FlatList, StyleSheet, Text, View} from "react-native";
 import Title from "../components/ui/Title";
 import {useState, useEffect} from "react";
 import Ionicons from "@expo/vector-icons/Ionicons"
@@ -11,31 +11,38 @@ import Colors from "../constans/colors";
 let minBoundary = 1
 let maxBoundary = 100
 const generateRandomBetween = (min, max, exclude) => {
-        const rndNum = Math.floor(Math.random() * (max - min)) + min
+    const rndNum = Math.floor(Math.random() * (max - min)) + min
 
-        if (rndNum === exclude) {
-            return generateRandomBetween(min, max, exclude)
-        } else {
-            return rndNum
-        }
+    if (rndNum === exclude) {
+        return generateRandomBetween(min, max, exclude)
+    } else {
+        return rndNum
     }
-
+}
 
 
 const GameScreen = props => {
     const initialGuess = generateRandomBetween(1, 100, props.guessedNumber)
     const [currentGuess, setCurrentGuess] = useState(initialGuess)
+    const [guessRounds, setGuessRounds] = useState([initialGuess])
 
     useEffect(() => {
         if (currentGuess === props.guessedNumber) {
             props.onGameOver()
+            minBoundary = 1
+            maxBoundary = 100
         }
-        }, [currentGuess, props.guessedNumber, props.onGameOver]);
+    }, [currentGuess, props.guessedNumber, props.onGameOver]);
 
+
+    useEffect(() => {
+        minBoundary = 1;
+        maxBoundary = 100;
+    }, [])
 
     const nextGuessHandler = (direction) => { // direction => lower, greater
         if (
-            (direction === "lower" && currentGuess < props.guessedNumber ) ||
+            (direction === "lower" && currentGuess < props.guessedNumber) ||
             (direction === "greater" && currentGuess > props.guessedNumber)
         ) {
             Alert.alert("Don't lie!", "This is wrong!", [{text: "Sorry!", style: "cancel"}])
@@ -44,11 +51,11 @@ const GameScreen = props => {
         if (direction === "lower") {
             maxBoundary = currentGuess
         } else {
-            minBoundary = currentGuess + 1;
+            minBoundary = currentGuess + 1
         }
         const newRndNmbr = generateRandomBetween(minBoundary, maxBoundary, currentGuess)
         setCurrentGuess(newRndNmbr)
-
+        setGuessRounds(prevGuess => [newRndNmbr, ...prevGuess])
     }
 
     return (
@@ -65,6 +72,24 @@ const GameScreen = props => {
                         <Ionicons name="md-add" size={24}/>
                     </PrimaryButton>
                 </View>
+            </View>
+            <View style={styles.listContainer}>
+                {/*{guessRounds.map(guessRound =>
+                        <Text
+                            key={guessRound}>
+                            {guessRound}
+                        </Text>
+                    )}*/}
+                <FlatList
+                    keyExtractor={(item) => item}
+                    data={guessRounds}
+                    renderItem={(itemData) => {
+                        return (
+                            <Text style={styles.listItem}>
+                                {itemData.item}
+                            </Text>
+                        )
+                    }}/>
             </View>
         </View>
     )
@@ -88,6 +113,22 @@ const styles = StyleSheet.create({
     text: {
         fontWeight: "bold",
         fontSize: 16,
+    },
+    listContainer: {
+        flex: 1,
+        width: "100%",
+        alignItems: "center"
+    },
+    listItem: {
+        backgroundColor: "yellow",
+        width: 100,
+        textAlign: "center",
+        padding: 10,
+        margin: 10,
+        fontWeight: "bold",
+        borderColor: "black",
+        borderWidth: 1,
+
     }
 })
 

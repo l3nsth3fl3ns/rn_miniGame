@@ -5,7 +5,7 @@ const primaryButton = props => {
     return (
         // pressed will be passed to pressable by RN
         <Pressable style={({pressed}) => pressed ? [styles.pressed,
-            styles.container] : styles.container} onPress={props.onPress}>
+            styles.container] : [styles.container, props.passedStyle]} onPress={props.onPress}>
             <View>
                 <Text style={styles.buttonText}>{props.children}</Text>
             </View>
@@ -26,7 +26,8 @@ const styles = StyleSheet.create({
         borderWidth: 0.5,
     },
     buttonText: {
-        color: "white"
+        color: "white",
+        textAlign: "center"
     },
     pressed: {
         opacity: 0.75,
